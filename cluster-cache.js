@@ -138,7 +138,6 @@ module.exports = function(cluster) {
             return new Promise(function(resolve, reject) {
                 process.send({ 
                     method: "keys", 
-                    ttl: ttl
                 });
                 resolve_dict.keys = resolve;
             });
