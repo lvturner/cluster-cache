@@ -36,7 +36,7 @@ module.exports = function(cluster) {
             });
             break;
             case "ttl":
-                cache.del(msg.key, msg.ttl, function(err, changed) { 
+                cache.ttl(msg.key, msg.ttl, function(err, changed) { 
                     worker.send({ 
                         sig: msg.method + msg.key,
                         body: {
