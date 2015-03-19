@@ -64,9 +64,10 @@ module.exports = function(cluster) {
                 });
             break;
             case "flushAll":
+                cache.flushAll();
                 worker.send({ 
                     sig: msg.method,
-                    body: cache.flushAll()
+                    body: cache.getStats()
                 });
             break;
         }
