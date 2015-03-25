@@ -77,7 +77,6 @@ module.exports = function(cluster) {
         var cache = new NodeCache();
 
         cluster.on('online', function(worker) {
-            console.log("Cluster cache has been told about " + worker.id);
             worker.on('message', incoming_message.bind(null, worker));
         });
     } else {
