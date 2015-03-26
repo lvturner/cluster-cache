@@ -1,5 +1,5 @@
 var cluster = require('cluster');
-var cluster_cache = require('./cluster-cache')(cluster);
+var cluster_cache = require('./cluster-node-cache')(cluster);
 if(cluster.isMaster && !process.env.DEBUG) {
     var cpus = require('os').cpus().length;
     for(var i = 0; i < cpus; i++) {
@@ -23,6 +23,16 @@ if(cluster.isMaster && !process.env.DEBUG) {
 
     cluster_cache.get("myKey2").then(function(result) {
         console.log("Get cache result... ");
+        console.log(result.value);
+    });
+
+    cluster_cache.set(undefined, "some value").then(function(result) {
+        console.log("Results of trying to set undefined key");
+        console.log(result.value);
+    });
+
+    cluster_cache.set("undefined", undefined).then(function(result) {
+        console.log("Results of setting undefined value");
         console.log(result.value);
     });
 

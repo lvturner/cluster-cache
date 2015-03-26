@@ -3,15 +3,26 @@ module.exports = function(cluster) {
     function incoming_message(worker, msg) {
         switch(msg.method) {
             case "set":
-                cache.set(msg.key, msg.val, msg.ttl, function(err, success) { 
-                worker.send({ 
-                    sig: msg.method + msg.key,
-                    body: {
-                        err: err,
-                        success: success
-                    }
-                });
-            });
+                if(msg.key === undefined || msg.key === null) {
+                    console.log("Trying to set a key with an undefined or null value!\n" + msg);
+                    worker.send({
+                        sig: msg.method + msg.key,
+                        body: { 
+                            err: "undefined or null key sent",
+                            success: {}
+                        }
+                    });
+                } else {
+                    cache.set(msg.key, msg.val, msg.ttl, function(err, success) { 
+                        worker.send({ 
+                            sig: msg.method + msg.key,
+                            body: {
+                                err: err,
+                                success: success
+                            }
+                        });
+                    });
+                }
             break;
             case "get":
                 cache.get(msg.key, function(err, value) {

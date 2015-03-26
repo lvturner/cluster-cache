@@ -1,8 +1,8 @@
 {
-  "name": "cluster-cache",
-  "version": "0.0.0",
+  "name": "cluster-node-cache",
+  "version": "0.0.1",
   "description": "A cluster aware wrapper for node-cache",
-  "main": "cluster-cache.js",
+  "main": "cluster-node-cache.js",
   "scripts": {
     "test": "mocha"
   },
