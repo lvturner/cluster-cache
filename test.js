@@ -11,6 +11,9 @@ if(cluster.isMaster && !process.env.DEBUG) {
         cluster.fork();
     });
 } else {
+    cluster_cache.get("key that can't exist");
+    cluster_cache.get(undefined);
+    cluster_cache.get(null);
     cluster_cache.set("myKey", "myVal", 1).then(function(result) {
         console.log("got result err: " + result.err);
         console.log("got result success: " + result.success);
@@ -33,6 +36,11 @@ if(cluster.isMaster && !process.env.DEBUG) {
 
     cluster_cache.set("undefined", undefined).then(function(result) {
         console.log("Results of setting undefined value");
+        console.log(result.value);
+    });
+
+    cluster_cache.get("undefined").then(function(result) {
+        console.log("Results of getting a value that's undefined");
         console.log(result.value);
     });
 

@@ -25,15 +25,26 @@ module.exports = function(cluster) {
                 }
             break;
             case "get":
-                cache.get(msg.key, function(err, value) {
-                    worker.send({ 
+                if(msg.key === undefined || msg.key === null) {
+                    console.log("Trying to get a key with an undefined or null value!\n" + msg);
+                    worker.send({
                         sig: msg.method + msg.key,
-                        body: {
-                            err: err,
-                            value: value
+                        body: { 
+                            err: "undefined or null key sent",
+                            success: {}
                         }
                     });
-            });
+                } else {
+                    cache.get(msg.key, function(err, value) {
+                        worker.send({ 
+                            sig: msg.method + msg.key,
+                            body: {
+                                err: err,
+                                value: value
+                            }
+                        });
+                    });
+                }
             break;
             case "del":
                 cache.del(msg.key, function(err, count) { 
