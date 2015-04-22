@@ -6,7 +6,7 @@ module.exports = function(cluster) {
                 if(msg.key === undefined || msg.key === null) {
                     console.log("Trying to set a key with an undefined or null value!\n" + msg);
                     worker.send({
-                        sig: msg.method + msg.key,
+                        sig: msg.method + msg.key + msg.timestamp,
                         body: { 
                             err: "undefined or null key sent",
                             success: {}
@@ -15,7 +15,7 @@ module.exports = function(cluster) {
                 } else {
                     cache.set(msg.key, msg.val, msg.ttl, function(err, success) { 
                         worker.send({ 
-                            sig: msg.method + msg.key,
+                            sig: msg.method + msg.key + msg.timestamp,
                             body: {
                                 err: err,
                                 success: success
@@ -28,7 +28,7 @@ module.exports = function(cluster) {
                 if(msg.key === undefined || msg.key === null) {
                     console.log("Trying to get a key with an undefined or null value!\n" + msg);
                     worker.send({
-                        sig: msg.method + msg.key,
+                        sig: msg.method + msg.key + msg.timestamp,
                         body: { 
                             err: "undefined or null key sent",
                             success: {}
@@ -37,7 +37,7 @@ module.exports = function(cluster) {
                 } else {
                     cache.get(msg.key, function(err, value) {
                         worker.send({ 
-                            sig: msg.method + msg.key,
+                            sig: msg.method + msg.key + msg.timestamp,
                             body: {
                                 err: err,
                                 value: value
@@ -49,7 +49,7 @@ module.exports = function(cluster) {
             case "del":
                 cache.del(msg.key, function(err, count) { 
                     worker.send({ 
-                        sig: msg.method + msg.key,
+                        sig: msg.method + msg.key + msg.timestamp,
                         body: {
                             err: err,
                             count: count
@@ -60,7 +60,7 @@ module.exports = function(cluster) {
             case "ttl":
                 cache.ttl(msg.key, msg.ttl, function(err, changed) { 
                     worker.send({ 
-                        sig: msg.method + msg.key,
+                        sig: msg.method + msg.key + msg.timestamp,
                         body: {
                             err: err,
                             changed: changed
@@ -71,7 +71,7 @@ module.exports = function(cluster) {
             case "keys":
                 cache.keys(function(err, keys) {
                     worker.send({ 
-                        sig: msg.method,
+                        sig: msg.method + msg.timestamp,
                         body: {
                             err: err,
                             keys: keys
@@ -81,14 +81,14 @@ module.exports = function(cluster) {
             break;
             case "getStats":
                 worker.send({ 
-                    sig: msg.method,
+                    sig: msg.method + msg.timestamp,
                     body: cache.getStats() 
                 });
             break;
             case "flushAll":
                 cache.flushAll();
                 worker.send({ 
-                    sig: msg.method,
+                    sig: msg.method + msg.timestamp,
                     body: cache.getStats()
                 });
             break;
@@ -114,71 +114,85 @@ module.exports = function(cluster) {
 
         ClusterCache.set = function(key, val, ttl) {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
                     method: "set", 
+                    timestamp: timestamp,
                     key: key, 
                     val: val, 
                     ttl: ttl 
                 });
-                resolve_dict["set" + key] = resolve;
+                resolve_dict["set" + key + timestamp] = resolve;
             });
         };
 
         ClusterCache.get = function(key) {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
                     method: "get", 
+                    timestamp: timestamp,
                     key: key, 
                 });
-                resolve_dict["get" + key] = resolve;
+                resolve_dict["get" + key + timestamp] = resolve;
             });
         };
 
         ClusterCache.del = function(key) {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
                     method: "del", 
+                    timestamp: timestamp,
                     key: key, 
                 });
-                resolve_dict["del" + key] = resolve;
+                resolve_dict["del" + key + timestamp] = resolve;
             });
         };
 
         ClusterCache.ttl = function(key, ttl) {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
                     method: "ttl", 
+                    timestamp: timestamp,
                     key: key, 
                     ttl: ttl
                 });
-                resolve_dict["ttl" + key] = resolve;
+                resolve_dict["ttl" + key + timestamp] = resolve;
             });
         };
 
         ClusterCache.keys = function() {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
                     method: "keys", 
+                    timestamp: timestamp,
                 });
-                resolve_dict.keys = resolve;
+                resolve_dict['keys' + timestamp] = resolve;
             });
         };
 
         ClusterCache.getStats = function() {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
-                    method: "getStats" 
+                    method: "getStats",
+                    timestamp: timestamp,
                 });
-                resolve_dict.getStats = resolve;
+                resolve_dict['getStats' + timestamp] = resolve;
             });
         };
 
         ClusterCache.flushAll = function() {
             return new Promise(function(resolve, reject) {
+              var timestamp = (new Date()).getTime();
                 process.send({ 
-                    method: "flushAll" 
+                    method: "flushAll",
+                    timestamp: timestamp,
                 });
-                resolve_dict.flushAll = resolve;
+                resolve_dict['flushAll' + timestamp] = resolve;
             });
         };
 
