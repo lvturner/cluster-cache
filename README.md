@@ -4,7 +4,6 @@ cluster-node-cache
 
 [![NPM](https://nodei.co/npm/cluster-node-cache.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/cluster-node-cache/)
 
-
 # Simple and fast NodeJS internal caching that works in a clustered environment.
 
 This module is a wrapper for [node-cache](https://github.com/tcds-de/nodecache) that allows it to work in a 
@@ -24,8 +23,8 @@ This does not yet support the the 2.0 release of node-cache.
 ## Initialize (INIT):
 
 ```js
-var NodeCache = require( "node-cache" );
-var myCache = new NodeCache();
+var cluster = require('cluster');
+var cache = require('cluster-node-cache')(cluster);
 ```
 
 ### Options
@@ -37,7 +36,7 @@ var myCache = new NodeCache();
 
 ```js
 var cluster = require('cluster');
-var cache = require('cluster-node-cache')(cluster);
+var cache = require('cluster-node-cache')(cluster, {stdTTL: 100, checkperiod: 900});
 ```
 
 ## Store a key (SET):
@@ -57,7 +56,7 @@ myCache.set("myKey", obj).then(function(result) {
 
 ## Retrieve a key (GET):
 
-`myCache.get(key, [callback])`
+`myCache.get(key)`
 
 Gets a saved value from the cache.
 Returns a `undefined` if not found or expired.
