@@ -6,7 +6,7 @@ cluster-node-cache
 
 # Simple and fast NodeJS internal caching that works in a clustered environment.
 
-This module is a wrapper for [node-cache](https://github.com/tcds-de/nodecache) that allows it to work in a 
+This module is a wrapper for [node-cache](https://github.com/tcs-de/nodecache) that allows it to work in a 
 clustered environment - without it, you would have an instance of node-cache per core. It's API and functionality
 is mostly similar. 
 
