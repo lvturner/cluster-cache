@@ -24,7 +24,7 @@ This does not yet support the the 2.0 release of node-cache.
 
 ```js
 var cluster = require('cluster');
-var cache = require('cluster-node-cache')(cluster);
+var myCache = require('cluster-node-cache')(cluster);
 ```
 
 ### Options
@@ -36,7 +36,7 @@ var cache = require('cluster-node-cache')(cluster);
 
 ```js
 var cluster = require('cluster');
-var cache = require('cluster-node-cache')(cluster, {stdTTL: 100, checkperiod: 900});
+var myCache = require('cluster-node-cache')(cluster, {stdTTL: 100, checkperiod: 900});
 ```
 
 ## Store a key (SET):
