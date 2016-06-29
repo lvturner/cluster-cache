@@ -25,7 +25,8 @@
 	"tags": [ "cluster", "node-cache", "cache", "caching", "local", "variable", "multi", "memory", "internal", "node", "memcached", "object" ],
   "dependencies": {
     "bluebird": "^2.9.14",
-    "node-cache": "^1.1.0"
+    "node-cache": "^1.1.0",
+    "cls-bluebird": "^1.1.3"
   },
   "devDependencies": {
     "async": "^0.9.0"

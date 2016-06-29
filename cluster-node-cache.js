@@ -1,8 +1,9 @@
-module.exports = function(cluster, options) {
+module.exports = function(cluster, options, namespace) {
   var UNDEFINED_KEY_ERROR = "Undefined or null key";
 
-  var NodeCache = require("node-cache");
-  var Promise = require('bluebird');
+  var NodeCache     = require("node-cache");
+  var Promise       = require('bluebird');
+  var clsBluebird   = require('cls-bluebird');
 
   function incoming_message(worker, msg) {
     switch(msg.method) {
@@ -10,14 +11,14 @@ module.exports = function(cluster, options) {
         if(msg.key === undefined || msg.key === null) {
           worker.send({
             sig: msg.method + msg.key + msg.timestamp,
-            body: { 
+            body: {
               err: UNDEFINED_KEY_ERROR,
               success: {}
             }
           });
         } else {
-          cache.set(msg.key, msg.val, msg.ttl, function(err, success) { 
-            worker.send({ 
+          cache.set(msg.key, msg.val, msg.ttl, function(err, success) {
+            worker.send({
               sig: msg.method + msg.key + msg.timestamp,
               body: {
                 err: err,
@@ -31,14 +32,14 @@ module.exports = function(cluster, options) {
         if(msg.key === undefined || msg.key === null) {
           worker.send({
             sig: msg.method + msg.key + msg.timestamp,
-            body: { 
+            body: {
               err: UNDEFINED_KEY_ERROR,
               success: {}
             }
           });
         } else {
           cache.get(msg.key, function(err, value) {
-            worker.send({ 
+            worker.send({
               sig: msg.method + msg.key + msg.timestamp,
               body: {
                 err: err,
@@ -49,8 +50,8 @@ module.exports = function(cluster, options) {
         }
         break;
       case "del":
-        cache.del(msg.key, function(err, count) { 
-          worker.send({ 
+        cache.del(msg.key, function(err, count) {
+          worker.send({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: err,
@@ -60,8 +61,8 @@ module.exports = function(cluster, options) {
         });
         break;
       case "ttl":
-        cache.ttl(msg.key, msg.ttl, function(err, changed) { 
-          worker.send({ 
+        cache.ttl(msg.key, msg.ttl, function(err, changed) {
+          worker.send({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: err,
@@ -72,7 +73,7 @@ module.exports = function(cluster, options) {
         break;
       case "keys":
         cache.keys(function(err, keys) {
-          worker.send({ 
+          worker.send({
             sig: msg.method + msg.timestamp,
             body: {
               err: err,
@@ -82,14 +83,14 @@ module.exports = function(cluster, options) {
         });
         break;
       case "getStats":
-        worker.send({ 
+        worker.send({
           sig: msg.method + msg.timestamp,
-          body: cache.getStats() 
+          body: cache.getStats()
         });
         break;
       case "flushAll":
         cache.flushAll();
-        worker.send({ 
+        worker.send({
           sig: msg.method + msg.timestamp,
           body: cache.getStats()
         });
@@ -114,6 +115,10 @@ module.exports = function(cluster, options) {
       debugCache = new NodeCache(options);
     }
 
+    if (namespace){
+      clsBluebird(namespace,Promise);
+    }
+
     process.on("message", function(msg) {
       if(resolve_dict[msg.sig]) {
         resolve_dict[msg.sig](msg.body);
@@ -125,20 +130,20 @@ module.exports = function(cluster, options) {
       return new Promise(function(resolve, reject) {
         if(debugMode) {
           if(key === undefined || key === null) {
-            resolve({ err: "Undefined or null key", success: {} });   
+            resolve({ err: "Undefined or null key", success: {} });
           } else {
             debugCache.set(key, val, ttl, function(err, success) {
               resolve({ err: err, success: success });
             });
           }
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
-            method: "set", 
+          process.send({
+            method: "set",
             timestamp: timestamp,
-            key: key, 
-            val: val, 
-            ttl: ttl 
+            key: key,
+            val: val,
+            ttl: ttl
           });
           resolve_dict["set" + key + timestamp] = resolve;
         }
@@ -155,12 +160,12 @@ module.exports = function(cluster, options) {
               resolve({ err: err, value: value });
             });
           }
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
-            method: "get", 
+          process.send({
+            method: "get",
             timestamp: timestamp,
-            key: key, 
+            key: key,
           });
           resolve_dict["get" + key + timestamp] = resolve;
         }
@@ -173,12 +178,12 @@ module.exports = function(cluster, options) {
           debugCache.del(key, function(err, count) {
             resolve({ err: err, count: count });
           });
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
-            method: "del", 
+          process.send({
+            method: "del",
             timestamp: timestamp,
-            key: key, 
+            key: key,
           });
           resolve_dict["del" + key + timestamp] = resolve;
         }
@@ -191,12 +196,12 @@ module.exports = function(cluster, options) {
           debugCache.ttl(key, ttl, function(err, changed) {
             resolve({ err: err, changed: changed });
           });
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
-            method: "ttl", 
+          process.send({
+            method: "ttl",
             timestamp: timestamp,
-            key: key, 
+            key: key,
             ttl: ttl
           });
           resolve_dict["ttl" + key + timestamp] = resolve;
@@ -210,10 +215,10 @@ module.exports = function(cluster, options) {
           debugCache.keys(function(err, keys) {
             resolve({ err: err, value: keys });
           });
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
-            method: "keys", 
+          process.send({
+            method: "keys",
             timestamp: timestamp,
           });
           resolve_dict['keys' + timestamp] = resolve;
@@ -225,9 +230,9 @@ module.exports = function(cluster, options) {
       return new Promise(function(resolve, reject) {
         if(debugMode) {
           resolve(debugCache.getStats());
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
+          process.send({
             method: "getStats",
             timestamp: timestamp,
           });
@@ -240,9 +245,9 @@ module.exports = function(cluster, options) {
       return new Promise(function(resolve, reject) {
         if(debugMode) {
           resolve(debugCache.flushAll());
-        } else { 
+        } else {
           var timestamp = (new Date()).getTime();
-          process.send({ 
+          process.send({
             method: "flushAll",
             timestamp: timestamp,
           });
