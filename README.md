@@ -40,7 +40,6 @@ var myCache = require('cluster-node-cache')(cluster, {stdTTL: 100, checkperiod: 
 ```
 
 ### Optional CLS support
-- `namespace`: *(default: `none`)* the namespace used to patch bluebird with cls support.
 
 ```js
 var cluster = require('cluster');
