@@ -1,6 +1,15 @@
 var cluster = require('cluster');
 var async = require('async');
-var cluster_cache = require('./cluster-node-cache')(cluster);
+var cluster_cache;
+try {
+  var cls = require('continuation-local-storage');
+  var ns = cls.createNamespace('myNamespace');
+  cluster_cache = require('./cluster-node-cache')(cluster,{},ns);
+} catch (e) {
+  console.log("*** CLS support not found, continuing without");
+  cluster_cache = require('./cluster-node-cache')(cluster);
+}
+
 if(cluster.isMaster && !process.env.DEBUG) {
   worker = cluster.fork();
   cluster.on('exit', function() {
