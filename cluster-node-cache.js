@@ -139,7 +139,7 @@ module.exports = function(cluster, options, namespace) {
             });
           }
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict["set" + key + timestamp] = resolve;
           process.send({
             method: "set",
@@ -163,7 +163,7 @@ module.exports = function(cluster, options, namespace) {
             });
           }
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict["get" + key + timestamp] = resolve;
           process.send({
             method: "get",
@@ -181,7 +181,7 @@ module.exports = function(cluster, options, namespace) {
             resolve({ err: err, count: count });
           });
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict["del" + key + timestamp] = resolve;
           process.send({
             method: "del",
@@ -199,7 +199,7 @@ module.exports = function(cluster, options, namespace) {
             resolve({ err: err, changed: changed });
           });
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict["ttl" + key + timestamp] = resolve;
           process.send({
             method: "ttl",
@@ -218,7 +218,7 @@ module.exports = function(cluster, options, namespace) {
             resolve({ err: err, value: keys });
           });
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict['keys' + timestamp] = resolve;
           process.send({
             method: "keys",
@@ -233,7 +233,7 @@ module.exports = function(cluster, options, namespace) {
         if(debugMode) {
           resolve(debugCache.getStats());
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict['getStats' + timestamp] = resolve;
           process.send({
             method: "getStats",
@@ -248,7 +248,7 @@ module.exports = function(cluster, options, namespace) {
         if(debugMode) {
           resolve(debugCache.flushAll());
         } else {
-          var timestamp = (new Date()).getTime();
+          var timestamp = (new Date()).getTime() + Math.random();
           resolve_dict['flushAll' + timestamp] = resolve;
           process.send({
             method: "flushAll",
