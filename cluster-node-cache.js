@@ -123,6 +123,8 @@ module.exports = function(cluster, options, namespace) {
       if(resolve_dict[msg.sig]) {
         resolve_dict[msg.sig](msg.body);
         delete resolve_dict[msg.sig];
+      } else {
+        throw new Error("Could not find key: " + msg.sig);
       }
     });
 
@@ -138,6 +140,7 @@ module.exports = function(cluster, options, namespace) {
           }
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict["set" + key + timestamp] = resolve;
           process.send({
             method: "set",
             timestamp: timestamp,
@@ -145,7 +148,6 @@ module.exports = function(cluster, options, namespace) {
             val: val,
             ttl: ttl
           });
-          resolve_dict["set" + key + timestamp] = resolve;
         }
       });
     };
@@ -162,12 +164,12 @@ module.exports = function(cluster, options, namespace) {
           }
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict["get" + key + timestamp] = resolve;
           process.send({
             method: "get",
             timestamp: timestamp,
             key: key,
           });
-          resolve_dict["get" + key + timestamp] = resolve;
         }
       });
     };
@@ -180,12 +182,12 @@ module.exports = function(cluster, options, namespace) {
           });
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict["del" + key + timestamp] = resolve;
           process.send({
             method: "del",
             timestamp: timestamp,
             key: key,
           });
-          resolve_dict["del" + key + timestamp] = resolve;
         }
       });
     };
@@ -198,13 +200,13 @@ module.exports = function(cluster, options, namespace) {
           });
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict["ttl" + key + timestamp] = resolve;
           process.send({
             method: "ttl",
             timestamp: timestamp,
             key: key,
             ttl: ttl
           });
-          resolve_dict["ttl" + key + timestamp] = resolve;
         }
       });
     };
@@ -217,11 +219,11 @@ module.exports = function(cluster, options, namespace) {
           });
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict['keys' + timestamp] = resolve;
           process.send({
             method: "keys",
             timestamp: timestamp,
           });
-          resolve_dict['keys' + timestamp] = resolve;
         }
       });
     };
@@ -232,11 +234,11 @@ module.exports = function(cluster, options, namespace) {
           resolve(debugCache.getStats());
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict['getStats' + timestamp] = resolve;
           process.send({
             method: "getStats",
             timestamp: timestamp,
           });
-          resolve_dict['getStats' + timestamp] = resolve;
         }
       });
     };
@@ -247,11 +249,11 @@ module.exports = function(cluster, options, namespace) {
           resolve(debugCache.flushAll());
         } else {
           var timestamp = (new Date()).getTime();
+          resolve_dict['flushAll' + timestamp] = resolve;
           process.send({
             method: "flushAll",
             timestamp: timestamp,
           });
-          resolve_dict['flushAll' + timestamp] = resolve;
         }
       });
     };
