@@ -126,8 +126,6 @@ module.exports = function(cluster, options, namespace) {
       if(resolve_dict[msg.sig]) {
         resolve_dict[msg.sig](msg.body);
         delete resolve_dict[msg.sig];
-      } else {
-        throw new Error("Could not find key: " + msg.sig);
       }
     });
 
