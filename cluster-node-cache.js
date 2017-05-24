@@ -7,96 +7,115 @@ module.exports = function(cluster, options, namespace) {
 
   var crypto = require('crypto');
 
+  function prefixData(data) {
+    data.clusternodecache = true;
+
+    if (namespace && namespace.name) {
+      data.namespace = namespace.name;
+    }
+
+    return data;
+  }
 
   function incoming_message(worker, msg) {
+    // validate this message is for us
+    if (!msg.clusternodecache) {
+      return;
+    }
+
+    if (msg.namespace && namespace && msg.namespace != namespace.name) {
+      // for another cache (namespace)
+      return;
+    }
+
     switch(msg.method) {
       case "set":
         if(msg.key === undefined || msg.key === null) {
-          worker.send({
+          worker.send(prefixData({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: UNDEFINED_KEY_ERROR,
               success: {}
             }
-          });
+          }));
         } else {
           cache.set(msg.key, msg.val, msg.ttl, function(err, success) {
-            worker.send({
+            worker.send(prefixData({
               sig: msg.method + msg.key + msg.timestamp,
               body: {
                 err: err,
                 success: success
               }
-            });
+            }));
           });
         }
         break;
       case "get":
         if(msg.key === undefined || msg.key === null) {
-          worker.send({
+          worker.send(prefixData({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: UNDEFINED_KEY_ERROR,
               success: {}
             }
-          });
+          }));
         } else {
           cache.get(msg.key, function(err, value) {
-            worker.send({
+            worker.send(prefixData({
               sig: msg.method + msg.key + msg.timestamp,
               body: {
                 err: err,
                 value: value
               }
-            });
+            }));
           });
         }
         break;
       case "del":
         cache.del(msg.key, function(err, count) {
-          worker.send({
+          worker.send(prefixData({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: err,
               count: count
             }
-          });
+          }));
         });
         break;
       case "ttl":
         cache.ttl(msg.key, msg.ttl, function(err, changed) {
-          worker.send({
+          worker.send(prefixData({
             sig: msg.method + msg.key + msg.timestamp,
             body: {
               err: err,
               changed: changed
             }
-          });
+          }));
         });
         break;
       case "keys":
         cache.keys(function(err, keys) {
-          worker.send({
+          worker.send(prefixData({
             sig: msg.method + msg.timestamp,
             body: {
               err: err,
               keys: keys
             }
-          });
+          }));
         });
         break;
       case "getStats":
-        worker.send({
+        worker.send(prefixData({
           sig: msg.method + msg.timestamp,
           body: cache.getStats()
-        });
+        }));
         break;
       case "flushAll":
         cache.flushAll();
-        worker.send({
+        worker.send(prefixData({
           sig: msg.method + msg.timestamp,
           body: cache.getStats()
-        });
+        }));
         break;
     }
   }
@@ -123,6 +142,16 @@ module.exports = function(cluster, options, namespace) {
     }
 
     process.on("message", function(msg) {
+      // validate this message is for us
+      if (!msg.clusternodecache) {
+        return;
+      }
+
+      if (msg.namespace && namespace && msg.namespace != namespace.name) {
+        // for another cache (namespace)
+        return;
+      }
+
       if(resolve_dict[msg.sig]) {
         resolve_dict[msg.sig](msg.body);
         delete resolve_dict[msg.sig];
@@ -142,13 +171,13 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict["set" + key + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "set",
             timestamp: timestamp,
             key: key,
             val: val,
             ttl: ttl
-          });
+          }));
         }
       });
     };
@@ -166,11 +195,11 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict["get" + key + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "get",
             timestamp: timestamp,
             key: key,
-          });
+          }));
         }
       });
     };
@@ -184,11 +213,11 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict["del" + key + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "del",
             timestamp: timestamp,
             key: key,
-          });
+          }));
         }
       });
     };
@@ -202,12 +231,12 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict["ttl" + key + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "ttl",
             timestamp: timestamp,
             key: key,
             ttl: ttl
-          });
+          }));
         }
       });
     };
@@ -221,10 +250,10 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict['keys' + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "keys",
             timestamp: timestamp,
-          });
+          }));
         }
       });
     };
@@ -236,10 +265,10 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict['getStats' + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "getStats",
             timestamp: timestamp,
-          });
+          }));
         }
       });
     };
@@ -251,10 +280,10 @@ module.exports = function(cluster, options, namespace) {
         } else {
           var timestamp = getId();
           resolve_dict['flushAll' + timestamp] = resolve;
-          process.send({
+          process.send(prefixData({
             method: "flushAll",
             timestamp: timestamp,
-          });
+          }));
         }
       });
     };
