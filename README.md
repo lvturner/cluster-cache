@@ -185,6 +185,9 @@ myCache.flushAll().then(function(results) {
 
 # Pull requests welcomed !
   * Especially if they contain tests better than the current terrible ones :)
+  
+# Donate
+If you find this useful and wish to see continued improvements on it, please consider donating me some bitcoin using the following address: 1Jqv61KtqfLF21gPFWJkqeRVeTBzom54RR
 
 # The ISC License
 
