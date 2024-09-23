@@ -126,6 +126,8 @@ module.exports = function(cluster, options, namespace) {
     cluster.on('online', function(worker) {
       worker.on('message', incoming_message.bind(null, worker));
     });
+    
+    return cache;
   } else {
     var ClusterCache = {};
     var resolve_dict = {};
