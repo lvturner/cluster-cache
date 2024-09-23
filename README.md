@@ -4,6 +4,8 @@ cluster-node-cache
 
 [![NPM](https://nodei.co/npm/cluster-node-cache.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/cluster-node-cache/)
 
+# Please note: I am no longer actively maintaining or working on this
+
 # Simple and fast NodeJS internal caching that works in a clustered environment.
 
 This module is a wrapper for [node-cache](https://github.com/tcs-de/nodecache) that allows it to work in a
